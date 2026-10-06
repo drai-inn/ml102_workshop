@@ -1,63 +1,95 @@
 # ML102 - Image analysis
-![reannz](/images/REANNZ_logo.png)
-This is an online workshop that will use Jupyter on the REANNZ Open OnDemand platform.
+
+A hands-on introduction to image analysis with neural networks, using
+TensorFlow and Keras in JupyterLab on a Coder workspace with a GPU.
+
+This is an adaptation of the NeSI/REANNZ
+[ML102 workshop](https://github.com/nesi/ml102_workshop), which ran on the
+REANNZ Open OnDemand platform. The notebooks have been changed to run in a
+Coder workspace, and a setup script now builds the Python environment for you.
 
 ## Setup
 
-At the beginning of the workshop, follow these instructions to start a session in the OnDemand portal:
+You only need to do this once per workspace.
 
-1. Connect to OnDemand: https://ondemand.nesi.org.nz
- ![login](/images/login.png)
+1. Start your Coder workspace and open a terminal (in JupyterLab:
+   **File > New > Terminal**).
 
+2. Get the workshop files, if they are not already in your home folder:
 
-2. Authenticate with your Organisations Tuakiri credentials (you may need to set up 2FA if you haven't already).
+   ```
+   cd ~
+   git clone https://github.com/drai-inn/ml102_workshop.git
+   cd ml102_workshop
+   ```
 
-   If you have any issues logging in, please let us know in the chat.
+3. Run the setup script:
 
-3. Choose the Jupyter App with options as below:
+   ```
+   ./setup_venv.sh
+   ```
 
-   - project code: *your project code*
-   - walltime: 8 hours
-   - number of CPUs: 4
-   - memory size: 8 GB
-   
-   then press the **Launch** button.
- 
-   ![](/images/jupyter_options.png)
+   It creates a Python environment in `ml102_workshop/venv3`, installs
+   TensorFlow 2.15 and the other packages the notebooks need, and adds a
+   Jupyter kernel called **ML102 (TF 2.15)**. It downloads about 4.7 GB, so
+   it takes a few minutes. At the end it prints the TensorFlow version and the
+   GPUs it can see.
 
-4. Let us know in zoom that you are ready to go (use 👍 reaction)
+   If `venv3` already exists, the script stops rather than overwrite it. Run
+   `./setup_venv.sh --force` to delete it and start again.
 
-⚠️ If you don't manage to connect, let us know as soon as possible in the chat. ⚠️
+4. Reload JupyterLab in your browser so it picks up the new kernel.
+
+5. Open a notebook from the `notebooks/` folder. It should start with the
+   **ML102 (TF 2.15)** kernel, shown at the top right of the notebook. If it
+   says **Python 3 (ipykernel)** instead, click the kernel name and choose
+   **ML102 (TF 2.15)**. The default Python kernel has no TensorFlow.
+
+More detail on what the script installs, and how to change it, is in
+[KERNEL.md](KERNEL.md).
 
 ## Workshop
 
-This workshop consists of a series of notebooks, adapted from the [TensorFlow tutorials](https://www.tensorflow.org/tutorials):
+The workshop is a series of notebooks, adapted from the
+[TensorFlow tutorials](https://www.tensorflow.org/tutorials):
 
 1. [Introduction](notebooks/01_introduction.ipynb)
 1. [Image classification](notebooks/02_classification.ipynb) ([source](https://www.tensorflow.org/tutorials/images/classification))
 1. [Transfer learning and fine-tuning](notebooks/03_transfer_learning.ipynb) ([source](https://www.tensorflow.org/tutorials/images/transfer_learning))
-1. [Slurm jobs on REANNZ GPUs](notebooks/04_slurm_jobs.ipynb)
-
-We have already made a copy of these notebooks for you in the folder:
-
-```
-/home/$USER/ml102_workshop/
-```
-
-where `$USER` stands for your NeSI username.
-
-You can also find them on GitHub: https://github.com/nesi/ml102_workshop
 
 ## Supplemental material
 
-We also created or adapted the following notebooks.
-We won't use them during the workshop.
+These notebooks are not part of the main workshop:
 
 - [Convolutional Neural Network (CNN)](notebooks/cnn.ipynb) example ([source](https://www.tensorflow.org/tutorials/images/cnn))
 - [Image Segmentation](notebooks/segmentation.ipynb) ([source](https://www.tensorflow.org/tutorials/images/segmentation))
 
-## Appendix
+## Things to know
 
-- [Generate a Jupyter kernel for the workshop](KERNEL.md) (for maintainers)
+- **Datasets are downloaded the first time you run a notebook.** Later runs
+  reuse the copy on disk.
 
-    - If you want to create a new kernel for the workshop, new instructions need to be written for OOD.     
+  | Notebook | Dataset | Saved to |
+  |---|---|---|
+  | `02_classification` | flower photos | `~/.keras/datasets/` |
+  | `03_transfer_learning` | cats_vs_dogs | `~/ml102_workshop/tensorflow_datasets/` |
+  | `cnn` | CIFAR-10 | `~/.keras/datasets/` |
+  | `segmentation` | oxford_iiit_pet | `~/ml102_workshop/tensorflow_datasets/` |
+
+  The oxford_iiit_pet download for `segmentation.ipynb` is slow (about an
+  hour), so start it well before you need it.
+
+- **The first training run is slow.** TensorFlow 2.15 predates the GPU in
+  these workspaces, so the GPU driver compiles TensorFlow's code on first use
+  and caches it. You will see warnings like `TensorFlow was not built with
+  CUDA kernel binaries compatible with compute capability 12.0`. They are
+  expected and harmless. Later runs reuse the cache and are much faster.
+
+- **Several notebooks can share the GPU.** The kernel lets each notebook take
+  only the GPU memory it needs, so you can keep more than one open. To free
+  the memory, shut down the kernels you are not using
+  (**Kernel > Shut Down Kernel**).
+
+- **Installing more packages:** use
+  `~/ml102_workshop/venv3/bin/python -m pip install <package>`, not
+  `uv pip install`. See [KERNEL.md](KERNEL.md#adding-packages) for why.
